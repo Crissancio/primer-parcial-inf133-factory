@@ -11,34 +11,44 @@ class Orden:
     def type_order(self):
         print()
 
-#class Order
+'''class OrdenFisica(self):
+    super().__init__():'''
+    
         
-ordenes = {
-            "1": {
-                "client": "Juan Perez",
-                "status": "Pendiente",
-                "payment": "Tarjeta de Crédito",
-                "shipping": 10.0,
-                "products": ["Camiseta", "Pantalón", "Zapatos"],
-                "order_type": "Física"
-            },
-            "2":{
-                "client": "Maria Rodriguez",
-                "status": "Pendiente",
-                "payment": "PayPal",
-                "code": "ABC123",
-                "expiration": "2022-12-31",
-                "order_type": "Digital"
-            }
-        }
+ordenes = {}
 
 class OrdenesService:
     @staticmethod
+    def find_order(id):
+        print()
+        return ordenes[id]
+        
+    
+    @staticmethod
     def add_order(data):
-        id = ordenes['id'][-1] + 1
-        data['id']=id
-        ordenes.append(data)
+        if len(ordenes)==0:
+            ordenes[1] = data
+        else:
+            index = ordenes.keys()
+            index = int(max(list(index)))+1
+            ordenes[index] = data
         return data
+    
+    @staticmethod
+    def filter_by_status(status):
+        return [
+            orden for orden in ordenes
+            if orden["status"] == status
+        ]
+    
+    @staticmethod
+    def update_order(id, data):
+        order = OrdenesService.find_order(id)
+        if order:
+            order.update(data)
+            return orders
+        else:
+            return None
         
 class ResponseHandler:
     @staticmethod
@@ -51,12 +61,17 @@ class ResponseHandler:
 class RESTfulRequestHandler(BaseHTTPRequestHandler):
     
     def do_GET(self):
-        if self.path == '/orders':
-            '''if "status" in query_params:
+        parsed_path = urlparse(self.path)
+        query_params = parse_qs(parsed_path.query)
+        
+        if parsed_path.path == '/orders':
+            if "status" in query_params:
                 status = query_params["status"][0]
+                print(status)
+                ordenes_filtradas= OrdenesService.filter_by_status(status)
+                ResponseHandler.response_handler(self, 200, ordenes_filtradas)
+            else:
                 ResponseHandler.response_handler(self, 200, ordenes)
-            else:'''
-            ResponseHandler.response_handler(self, 200, ordenes)
         else:
             ResponseHandler.response_handler(self, 404, ordenes)
     
@@ -82,7 +97,7 @@ class RESTfulRequestHandler(BaseHTTPRequestHandler):
 def run_server(port=8000):
     try:
         server_address = ("", port)
-        httpd = HTTPServer(server_address,port)
+        httpd = HTTPServer(server_address,RESTfulRequestHandler)
         print(f"Iniciando servidor HTTP en http://localhost:{port}/")
         httpd.serve_forever()
     except KeyboardInterrupt:
